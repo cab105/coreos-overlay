@@ -42,8 +42,8 @@ HOMEPAGE="https://github.com/coreos/rkt"
 
 LICENSE="Apache-2.0"
 SLOT="0"
-IUSE="doc examples +rkt_stage1_coreos +rkt_stage1_fly rkt_stage1_host rkt_stage1_src tpm"
-REQUIRED_USE="|| ( rkt_stage1_coreos rkt_stage1_fly rkt_stage1_host rkt_stage1_src )"
+IUSE="doc examples +rkt_stage1_coreos +rkt_stage1_fly rkt_stage1_host rkt_stage1_src +rkt_stage1_skim tpm"
+REQUIRED_USE="|| ( rkt_stage1_coreos rkt_stage1_fly rkt_stage1_host rkt_stage1_src rkt_stage1_skim )"
 
 COMMON_DEPEND="sys-apps/acl
 		tpm? ( app-crypt/trousers )"
@@ -105,6 +105,9 @@ src_configure() {
 	fi
 	if use rkt_stage1_src; then
 		add_stage1 "src"
+	fi
+	if use rkt_stage1_skim; then
+	    add_stage1 "skim"
 	fi
 
 	myeconfargs+=( $(use_enable tpm) )

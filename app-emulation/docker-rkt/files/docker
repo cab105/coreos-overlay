@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# The docker command is only accessible if the service is running
+
+if [ ! -x "/usr/bin/rkt" ]; then
+	echo "rkt is not installed"
+	exit 254
+fi
+
+RKTPODBASE="/var/lib/rkt/pods/run"
+STAGE2BRIDGE="/stage1/rootfs/opt/stage2/"
+
+ROUT=`rkt list --format=json`
+STARTING=0
+
+if [ "x${ROUT}" == "xnull" ]; then
+	echo "Docker is not available.  Starting..."
+	sudo systemctl start docker.service
+	STARTING=1
+fi
+
+if [ $STARTING -eq 1 ]; then
+	for i in `seq 1 10`; do
+		ROUT=`rkt list --format=json`
+		if [ "x${ROUT}" != "xnull" ]; then
+			break
+		fi
+
+		sleep 6
+	done
+fi
+
+if [ "x${ROUT}" == "xnull" ]; then
+	echo "Docker cannot be started"
+	exit 254
+fi
+
+UUIDNAME=`echo ${ROUT}|jq -r '.[]|select(.state == "running" and (.app_names[]|contains("docker")))|.name'`
+
+DOCKER="${RKTPODBASE}/${UUIDNAME}/${STAGE2BRIDGE}/docker/rootfs/usr/local/bin/docker"
+exec ${DOCKER} "$@"

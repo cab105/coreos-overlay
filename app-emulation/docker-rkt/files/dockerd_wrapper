@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Wrapper script to be invoked by docker.service to bring up dockerd
+# from a rkt pod
+
+RKTBIN=/usr/bin/rkt
+STAGE1_FLAVOR=/usr/lib/rkt/stage1-images/stage1-skim.aci
+RKT_OPTIONS="--insecure-options=image"
+
+HOST=ptolamaios.cabnetworks.net:3000
+DOCKER_IMAGE="http://${HOST}/dockerd-1.12.6-linux-amd64.aci"
+
+/usr/bin/ping -c 1 -W 5 `echo $HOST|awk -F: '{print $1}'` > /dev/null
+if [ $? != 0 ]; then
+	echo "Using local copy of images"
+	DOCKER_IMAGE=/usr/lib/rkt/docker-images/dockerd.aci
+fi
+
+
+exec ${RKTBIN} run --dns=host --stage1-path ${STAGE1_FLAVOR} "${RKT_OPTIONS}" ${DOCKER_IMAGE} -- "$@"

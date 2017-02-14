@@ -1,0 +1,21 @@
+#!/bin/bash
+
+RKTBIN=/usr/bin/rkt
+STAGE1_FLAVOR=/usr/lib/rkt/stage1-images/stage1-skim.aci
+RKT_OPTIONS="--insecure-options=image"
+
+HOST=ptolamaios.cabnetworks.net:3000
+RUNC_IMAGE="http://${HOST}/runc-1.0.0_rc2-linux-amd64.aci"
+CONTAINERD_IMAGE="http://${HOST}/containerd-0.2.5-linux-amd64.aci"
+
+/usr/bin/ping -c 1 -W 5 `echo $HOST|awk -F: '{print $1}'` > /dev/null
+if [ $? != 0 ]; then
+	echo "Using local copy of images"
+	RUNC_IMAGE=/usr/lib/rkt/docker-images/runc.aci
+	CONTAINERD_IMAGE=/usr/lib/rkt/docker-images/containerd.aci
+fi
+
+# fetch the runc image first
+${RKTBIN} fetch "${RKT_OPTIONS}" $RUNC_IMAGE > /dev/null
+
+exec ${RKTBIN} run --stage1-path ${STAGE1_FLAVOR} "${RKT_OPTIONS}" ${CONTAINERD_IMAGE} -- "$@"

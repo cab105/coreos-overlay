@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription lang="en">
+		Provide an out-of-band mechanism for docker updates that will not be
+		dependent upon updates to the Container OS.
+	</longdescription>
+</pkgmetadata>
+
